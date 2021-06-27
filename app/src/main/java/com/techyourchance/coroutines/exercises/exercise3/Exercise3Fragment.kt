@@ -1,6 +1,7 @@
 package com.techyourchance.coroutines.exercises.exercise3
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
@@ -55,9 +56,13 @@ class Exercise3Fragment : BaseFragment() {
         btnGetReputation = view.findViewById(R.id.btn_get_reputation)
         btnGetReputation.setOnClickListener {
             logThreadInfo("button callback")
+            val elapsedTimeJob = coroutineScope.launch {
+                updateElapsedTime()
+            }
             job = coroutineScope.launch {
                 btnGetReputation.isEnabled = false
                 val reputation = getReputationForUser(edtUserId.text.toString())
+                elapsedTimeJob.cancel()
                 Toast.makeText(requireContext(), "reputation: $reputation", Toast.LENGTH_SHORT).show()
                 btnGetReputation.isEnabled = true
             }
@@ -68,8 +73,19 @@ class Exercise3Fragment : BaseFragment() {
 
     override fun onStop() {
         super.onStop()
-        job?.cancel()
+        coroutineScope.coroutineContext.cancelChildren()
+        txtElapsedTime.text = ""
         btnGetReputation.isEnabled = true
+    }
+
+    private suspend fun updateElapsedTime() {
+        val starting = SystemClock.elapsedRealtimeNanos()
+        while (true) {
+            delay(100)
+            val now = SystemClock.elapsedRealtimeNanos()
+            val elapsedTimeMillis = (now - starting) / 1_000_000
+            txtElapsedTime.text = "$elapsedTimeMillis"
+        }
     }
 
     private suspend fun getReputationForUser(userId: String): Int {
