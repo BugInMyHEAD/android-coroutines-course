@@ -2,13 +2,11 @@ package com.techyourchance.coroutines.exercises.exercise4
 
 import java.math.BigInteger
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.*
-import java.util.concurrent.TimeUnit
 
 class FactorialUseCase {
 
-    public sealed class Result {
+    sealed class Result {
         class Success(val result: BigInteger) : Result()
         object Timeout : Result()
     }
@@ -48,7 +46,7 @@ class FactorialUseCase {
         }
 
         // add potentially "remaining" values to first thread's range
-        //threadsComputationRanges[0] = ComputationRange(1, threadsComputationRanges[0].end)
+        threadsComputationRanges[0] = ComputationRange(1, threadsComputationRanges[0].end)
 
         return threadsComputationRanges
     }
